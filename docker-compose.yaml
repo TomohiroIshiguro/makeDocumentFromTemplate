@@ -1,0 +1,12 @@
+version: '3'
+services:
+  clasp-app:
+    container_name: clasp-app
+    build:
+      context: app
+    tty: true
+    environment:
+      - TZ=Asia/Tokyo
+    volumes:
+      - ./src:/work
+      - ./app/clasp-login.sh:/clasp-login.sh:ro
