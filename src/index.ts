@@ -1,4 +1,5 @@
 function main() {
+  const beginTimestamp = Date.now();
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const showResultCell = ss.getSheetByName(SHEET_NAME_README).getRange(5,3);
   showResultCell.setValue("");
@@ -61,4 +62,9 @@ function main() {
     });
   });
   showResultCell.setValue("処理が完了しました。" + getTimestamp(dateFormat));
+  const endTimestamp = Date.now();
+  const pastTime = endTimestamp - beginTimestamp;
+  const pastTimeMin = Math.floor(pastTime / 1000 / 60);
+  const pastTimeSec = Math.floor(pastTime / 1000 % 60);
+  console.log("開始から " + pastTimeMin + " 分 " + pastTimeSec + " 秒経過");
 }
