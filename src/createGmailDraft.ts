@@ -1,29 +1,23 @@
-function createEmailDraft(fileId, fileName, user, properties, outputDir) {
-  console.log("createEmailDraft()");
-
-  // 成果物を保存するフォルダ
-  let destFolder = DriveApp.getFolderById(outputDir);
-  if (!destFolder) return;
-
-  // テンプレートファイル
-  const templateFile = DriveApp.getFileById(fileId);
-  if (!templateFile) return;
-
-  // ファイルを複製する
-  const document = templateFile.makeCopy(destFolder);
-  fileName = fileName
-      .replace("name", user.name);
-
-  const tempDocFile = DocumentApp.openById(document.getId());
-  tempDocFile.setName(fileName);
+function replaceEmailParameters(file, fileName, data, properties) {
+  console.log("replaceEmailProperties()");
+  const tempDocFile = DocumentApp.openById(file.getId());
 
   const body = tempDocFile.getBody();
   properties.forEach(property => {
-    body.replaceText(`{${property}}`, user[property]);
+    fileName = fileName.replace(`{${property}}`, data[property]);
+    tempDocFile.setName(fileName);
+    body.replaceText(`{${property}}`, data[property]);
   });
+  return data.to;
+}
 
-  const recipient = user.to;
-  const subject = fileName;
-  
+function createEmailDraft(file, address) {
+  console.log("createEmailDraft()");
+  const tempDocFile = DocumentApp.openById(file.getId());
+
+  const recipient = address;
+  const subject = tempDocFile.getName();
+  const body = tempDocFile.getBody();
+
   const draft = GmailApp.createDraft(recipient, subject, body.getText());
 }

@@ -1,4 +1,4 @@
-// ユーザー情報を取得する
+// 台帳のデータを読み込む
 function getMasterTable(ss, sheetName, properties) {
   console.log("getMasterData()");
   const users = ss
@@ -19,7 +19,7 @@ function getMasterTable(ss, sheetName, properties) {
   return array;
 }
 
-// ユーザー情報台帳シートの列名を取得する
+// config シートから台帳のプロパティ名 (列名) を取得する
 // *列名がテンプレートファイル内のプレースホルダのキーワード
 function getProperties(ss, sheetColumn) {
   const sheet = ss.getSheetByName(SHEET_NAME_CONFIG);

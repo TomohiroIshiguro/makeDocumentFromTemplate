@@ -1,3 +1,4 @@
+// config シートから台帳のシート名を取得する
 function getMasterTables(ss) {
   console.log("getMasterTables()");
   const sheet = ss.getSheetByName(SHEET_NAME_CONFIG);

@@ -1,5 +1,6 @@
 function main() {
   const beginTimestamp = Date.now();
+
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const showResultCell = ss.getSheetByName(SHEET_NAME_README).getRange(5,3);
   showResultCell.setValue("");
@@ -8,14 +9,14 @@ function main() {
 
   // テンプレートファイル情報を取得する
   const files = getTemplates(ss);
-  console.log(files.length);
   if (!files || files.length === 0) {
     showResultCell.setValue("テンプレートファイルが未選択のため、処理を中断します。" + getTimestamp(dateFormat));
     console.log("中断");
     return;
   }
+  console.log(files.length);
 
-  // 台帳シートのシート名一覧を取得する
+  // 台帳 (シート) 一覧を取得する
   const masters = getMasterTables(ss);
   console.log(masters);
 
@@ -49,22 +50,43 @@ function main() {
           .getRange(ROW_DATA_BEGIN, COLUMN_ROOT_DIR)
           .getValue();
     }
+
+    let document;
+    let address;
+    if (file.type == DOC_TYPE_DOCUMENT
+        || file.type == DOC_TYPE_EMAIL) {
+      document = createTempFile(file.id, file.output);
+    } else {
+      console.log("中断");
+      return;
+    }
+
     // ファイルをデータで置換する
     tables.forEach(item => {
       if (!item) return;
       item.data.forEach(row => {
         if (file.type == DOC_TYPE_DOCUMENT) {
-          createPDF(file.id, file.name, row, item.properties, file.output);
+          replaceDocParameters(document, file.name, row, item.properties);
         } else if (file.type == DOC_TYPE_EMAIL) {
-          createEmailDraft(file.id, file.name, row, item.properties, file.output);
+          const to = replaceEmailParameters(document, file.name, row, item.properties);
+          if (!address || address.length == 0) {
+            address = to;
+          }
         }
+        file.name = DocumentApp.openById(document.getId()).getName();
       });
     });
+
+    if (file.type == DOC_TYPE_DOCUMENT) {
+      createPDF(document, file.output);
+    } else if (file.type == DOC_TYPE_EMAIL) {
+      createEmailDraft(document, address);
+    }
   });
   showResultCell.setValue("処理が完了しました。" + getTimestamp(dateFormat));
   const endTimestamp = Date.now();
-  const pastTime = endTimestamp - beginTimestamp;
-  const pastTimeMin = Math.floor(pastTime / 1000 / 60);
-  const pastTimeSec = Math.floor(pastTime / 1000 % 60);
+  pastTime = endTimestamp - beginTimestamp;
+  pastTimeMin = Math.floor(pastTime / 1000 / 60);
+  pastTimeSec = Math.floor(pastTime / 1000 % 60);
   console.log("開始から " + pastTimeMin + " 分 " + pastTimeSec + " 秒経過");
 }
